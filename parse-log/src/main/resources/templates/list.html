@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="zh">
+<head>
+	<meta charset="utf-8"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+	<title>log list</title>
+	<link th:href="@{/css/bootstrap.min.css}" rel="stylesheet"/>
+	<link th:href="@{/font-awesome/css/font-awesome.css}" rel="stylesheet"/>
+	<link th:href="@{/css/style.css}" rel="stylesheet"/>
+	<link th:href="@{/css/bootstrap.css}" rel="stylesheet"/>
+	<script th:src="@{/js/jquery.min.js}" type="text/javascript"></script>
+	<script th:src="@{/js/public.js}" type="text/javascript"></script>
+
+	<style>
+		td {
+			width: 30%;
+		}
+
+		.col-md-2 {
+			width: auto;
+		}
+
+		.col-md-1 {
+			width: 100%;
+		}
+
+		.btn {
+			margin-left: 45%;
+		}
+		table{
+			border: solid 1px #eee;
+		}
+	</style>
+
+</head>
+<body>
+<!-- style="margin-left: 50px; margin-right: 50px; margin-top: 30px;" -->
+<div>
+	<div class="gray-bg">
+		<!-- th:fragment="headerNav" -->
+		<div class="row wrapper border-bottom white-bg ">
+			<div class="col-lg-10">
+				<h2>日志查询</h2>
+				<ol class="breadcrumb">
+					<li><a href="/index">首页</a></li>
+					<li class="active"><strong>日志查询</strong></li>
+				</ol>
+			</div>
+			<div class="col-lg-2"></div>
+		</div>
+
+		<div class="wrapper wrapper-content animated fadeInRight">
+			<div class="row">
+				<div class="col-lg-12">
+					<div class="ibox float-e-margins">
+						<div class="ibox-title">
+							<h5>搜索&amp;操作</h5>
+							<div class="ibox-tools">
+								<a class="collapse-link"> <i class="fa fa-chevron-up"></i>
+								</a>
+							</div>
+						</div>
+
+						<div class="ibox-content" style="display: block;">
+							<div class="row">
+								<div class="col-sm-6 m-b-xs"></div>
+							</div>
+							<div class="row">
+								<form id="logForm" action="/log/list" method="post">
+									<input type="hidden" id="pageNo" name="pageNo" value="1">
+									<input type="hidden" id="pageSize" name="pageSize" value="10">
+									<table style="margin-left: 30px; width: 90%">
+										<tr>
+											<td>
+												<div class="col-md-2">
+													<input type="text" name="_id"
+													       class="form-control" placeholder="输入_id">
+												</div>
+											</td>
+											<td>
+												<div class="col-md-2">
+													<input type="text" name="remote_addr"
+													       class="form-control" placeholder="输入remote_addr">
+												</div>
+											</td>
+											<td>
+												<div class="col-md-2">
+													<input type="text" name="remote_user"
+													       class="form-control" placeholder="输入remote_user">
+												</div>
+											</td>
+										</tr>
+										<tr>
+											<td>
+												<div class="col-md-2">
+													<input type="text" name="time_local"
+													       class="form-control" placeholder="输入time_local">
+												</div>
+											</td>
+											<td>
+												<div class="col-md-2">
+													<input type="text" name="request"
+													       class="form-control" placeholder="输入request">
+												</div>
+											</td>
+											<td>
+												<div class="col-md-2">
+													<input type="text" name="status"
+													       class="form-control" placeholder="输入status">
+												</div>
+											</td>
+										</tr>
+										<tr>
+											<td>
+												<div class="col-md-2">
+													<input type="text" name="body_bytes_sent"
+													       class="form-control" placeholder="输入body_bytes_sent">
+												</div>
+											</td>
+											<td>
+												<div class="col-md-2">
+													<input type="text" name="http_referer"
+													       class="form-control" placeholder="输入http_referer">
+												</div>
+											</td>
+											<td>
+												<div class="col-md-2">
+													<input type="text" name="http_user_agent"
+													       class="form-control" placeholder="输入http_user_agent">
+												</div>
+											</td>
+										</tr>
+										<tr>
+											<td>
+												<div class="col-md-2">
+													<input type="text" name="gzip_ratio"
+													       class="form-control" placeholder="输入gzip_ratio">
+												</div>
+											</td>
+											<td>
+												<div class="col-md-2">
+													<input type="text" name="request_time"
+													       class="form-control" placeholder="输入request_time">
+												</div>
+											</td>
+											<td>
+												<div class="col-md-2">
+													<input type="text" name="upstream_response_time"
+													       class="form-control" placeholder="输入upstream_response_time">
+												</div>
+											</td>
+										</tr>
+										<tr>
+											<td>
+												<div class="col-md-2">
+													<input type="text" name="upstream_addr"
+													       class="form-control" placeholder="输入pstream_addr">
+												</div>
+											</td>
+											<td>
+												<div class="col-md-2">
+													<input type="text" name="upstream_cache_status"
+													       class="form-control" placeholder="输入upstream_cache_status">
+												</div>
+											</td>
+											<td>
+												<div class="col-md-2">
+													<input type="text" name="upstream_status"
+													       class="form-control" placeholder="输入upstream_status">
+												</div>
+											</td>
+										</tr>
+										<div class="col-md-1">
+											<button type="button" id="queryButton" class="btn btn-primary btn-sm" onclick="queryData();">查询
+										</button>
+									</div>
+									</table>
+
+									<div class="col-lg-12">
+										<div class="ibox float-e-margins">
+											<div class="ibox-title">
+												<h5>日志列表</h5>
+												<div class="ibox-tools">
+													<a class="collapse-link"> <i class="fa fa-chevron-up"></i>
+													</a>
+												</div>
+											</div>
+											<div class="ibox-content">
+												<div class="table-responsive">
+													<div style="overflow-x: auto; overflow-y: auto; height: 500px">
+														<table class=" table table-hover" data-page-size="10"
+														       id="tableTest">
+															<!-- <s:iterator value="" var=""> -->
+															<thead>
+															<tr>
+																<th>id</th>
+																<th>remote_addr</th>
+																<th>remote_user</th>
+																<th>time_local</th>
+																<th>request</th>
+																<th>status</th>
+																<th>body_bytes_sent</th>
+																<th>http_referer</th>
+																<th>http_user_agent</th>
+																<th>gzip_ratio</th>
+																<th>request_time</th>
+																<th>upstream_response_time</th>
+																<th>upstream_addr</th>
+																<th>upstream_cache_status</th>
+																<th>upstream_status</th>
+															</tr>
+															</thead>
+															<tbody id="logDataTbody">
+															</tbody>
+														</table>
+													</div>
+												</div>
+												<div style="text-align:center;margin-top:30px;">
+													<a href="javascript:firstPage()"><span id="spanFirst">第一页</span></a>
+													<a href="javascript:prev()"><span id="spanPre">上一页</span></a>
+													<a href="javascript:next()"><span id="spanNext">下一页</span></a>
+													<a href="javascript:lastPage()"><span id="spanLast">最后一页</span></a>
+													<br/>
+													第<span id="spanPageNum">1</span>页/共<span id="spanTotalPage">1</span>页
+												</div>
+											</div>
+										</div>
+									</div>
+								</form>
+							</div>
+
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<script type="text/javascript">
+
+	function firstPage() {
+		$("#spanPageNum").text(1);
+		$("#pageNo").val(1);
+		queryData(1);
+	}
+
+	function lastPage() {
+		$("#spanPageNum").text($("#spanTotalPage").text());
+		$("#pageNo").val($("#spanTotalPage").text());
+		queryData();
+	}
+
+	function prev() {
+		var cur = Number($("#spanPageNum").text()) - 1;
+		if (cur < 1) {
+			cur = 1;
+		}
+		$("#spanPageNum").text(cur);
+		$("#pageNo").val(cur);
+		queryData();
+	}
+
+	function next() {
+		var cur = Number($("#spanPageNum").text()) + 1;
+		if (cur > $("#spanTotalPage").text()) {
+			cur = $("#spanTotalPage").text();
+		}
+		$("#spanPageNum").text(cur);
+		$("#pageNo").val(cur);
+		queryData(cur);
+	}
+	
+	function queryData() {
+		ajaxPost('/log/list', serializeNotNull($('#logForm').serialize()), refreshTable);
+/* 		$.ajax({
+			type: 'post',
+			url: '/log/list',
+			data: serializeNotNull($('#logForm').serialize()),
+			success: function (result){
+				refreshTable(result);
+			}
+		}); */
+	}
+	function refreshTable(result) {
+		var dataList = result.dataList;
+		var total = result.total;
+		$("#spanTotalPage").text(total);
+		$("#logDataTbody").empty();
+		if (dataList.length > 0) {
+			for (var i = 0; i < dataList.length; i++) {
+				var data = dataList[i];
+				$("#logDataTbody").append("<tr>");
+				$("#logDataTbody").append("<td>" + data._id + "</td>");
+				$("#logDataTbody").append("<td>" + data.remote_addr + "</td>");
+				$("#logDataTbody").append("<td>" + data.remote_user + "</td>");
+				$("#logDataTbody").append("<td>" + data.time_local + "</td>");
+				$("#logDataTbody").append("<td>" + data.request + "</td>");
+				$("#logDataTbody").append("<td>" + data.status + "</td>");
+				$("#logDataTbody").append("<td>" + data.body_bytes_sent + "</td>");
+				$("#logDataTbody").append("<td>" + data.http_referer + "</td>");
+				$("#logDataTbody").append("<td>" + data.http_user_agent + "</td>");
+				$("#logDataTbody").append("<td>" + data.gzip_ratio + "</td>");
+				$("#logDataTbody").append("<td>" + data.request_time + "</td>");
+				$("#logDataTbody").append("<td>" + data.upstream_response_time + "</td>");
+				$("#logDataTbody").append("<td>" + data.upstream_addr + "</td>");
+				$("#logDataTbody").append("<td>" + data.upstream_cache_status + "</td>");
+				$("#logDataTbody").append("<td>" + data.upstream_status + "</td>");
+				$("#logDataTbody").append("</tr>");
+			}
+		}
+	}
+
+</script>
+</body>
+</html>

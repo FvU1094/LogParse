@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<title>chart</title>
+	<link th:href="@{/css/bootstrap.min.css}" rel="stylesheet"/>
+	<link th:href="@{/font-awesome/css/font-awesome.css}" rel="stylesheet"/>
+	<link th:href="@{/css/style.css}" rel="stylesheet"/>
+	<link th:href="@{/css/bootstrap.css}" rel="stylesheet"/>
+	<link th:href="@{/css/bootstrap.min.css}" rel="stylesheet"/>
+	<script th:src="@{/js/jquery.min.js}" type="text/javascript"></script>
+	<script th:src="@{/js/public.js}" type="text/javascript"></script>
+	<link href="https://cdn.bootcss.com/bootstrap-select/1.12.4/css/bootstrap-select.min.css" rel="stylesheet">
+	<script th:src="@{/js/jquery.min.js}" type="text/javascript"></script>
+	<script th:src="@{/js/echarts.js}" type="text/javascript"></script>
+</head>
+<style>
+	.selectBox{
+		height: 30px;
+		weight: 70px;		
+	}
+</style>
+<body>
+<body>
+<!-- style="margin-left: 50px; margin-right: 50px; margin-top: 30px;" -->
+
+<div>
+	<div class="gray-bg">
+		<!-- th:fragment="headerNav" -->
+		<div class="row wrapper border-bottom white-bg ">
+			<div class="col-lg-10">
+				<h2>日志统计</h2>
+				<ol class="breadcrumb">
+					<li><a href="/index">首页</a></li>
+					<li class="active"><strong>日志统计</strong></li>
+				</ol>
+			</div>
+			<div class="col-lg-2"></div>
+		</div>
+
+		<div class="wrapper wrapper-content animated fadeInRight">
+			<div class="row">
+				<div class="col-lg-12">
+					<div class="ibox float-e-margins">
+						<div class="ibox-title">
+							<h5>图表显示</h5>
+							<div class="ibox-tools">
+								<a class="collapse-link"> <i class="fa fa-chevron-up"></i></a>
+
+							</div>
+						</div>
+						<div class="ibox-content">
+							<div>
+							<!-- <form id="selectItem" action="/selectItem" method="post"> -->
+								<div>
+								<select name="items" id="items"  class="col-md-2 selectBox">
+									<option value="">--请选择--</option>
+									<option value="remote_addr">remote_addr</option>
+									<option value="remote_user">remote_user</option>
+									<option value="time_local">time_local</option>
+									<option value="request">request</option>
+									<option value="status">status</option>
+									<option value="body_bytes_sent">body_bytes_sent</option>
+									<option value="http_referer">http_referer</option>
+									<option value="http_user_agent">http_user_agent</option>
+									<option value="gzip_ratio">gzip_ratio</option>
+									<option value="request_time">request_time</option>
+									<option value="upstream_response_time">upstream_response_time</option>
+									<option value="upstream_addr">upstream_addr</option>
+									<option value="upstream_cache_status">upstream_cache_status</option>
+									<option value="upstream_status">upstream_status</option>
+								</select>
+								<select name="limitNo" id="limitNo"  class="col-md-2 selectBox">
+									<option value="1">Top 1</option>
+									<option value="2">Top 2</option>
+									<option value="3">Top 3</option>
+									<option value="4">Top 4</option>
+									<option value="5" selected="selected">Top 5</option>
+									<option value="6">Top 6</option>
+									<option value="7">Top 7</option>
+									<option value="8">Top 8</option>
+									<option value="9">Top 9</option>
+									<option value="10">Top 10</option>
+								</select>
+								
+								<button type="button" class="btn btn-primary btn-sm" onclick="itemChange()">
+									<i class="icon-search"></i>查询
+								</button>
+								</div>
+							<!-- </form>	 -->
+							
+							</div>
+							<!-- echarts容器 -->
+							<div id="mainChart" style="height: 400px; overflow: hidden; width: 90%; overflow: outo; margin: auto; "></div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+<script> 
+
+	//初始化chart
+	var myChart = echarts.init(document.getElementById('mainChart'));
+	
+	function initChart(){
+		
+		//初始化标题和坐标轴
+		myChart.setOption({
+			color: ['#1a7bb9'],
+			title: {
+				text : ''
+			},
+			tooltip: {
+				trigger: 'axis'
+			},
+			legend: {
+				data : ['统计']
+			},
+			xAxis: {
+				name: 'item',
+				data : [""]
+			},
+			yAxis: {
+				//splitLine : { show : false }, //去除网格线
+				name: 'count'
+			},
+			series: [{
+				barWidth : "30px",
+				name : '统计',
+				type : 'bar',
+	            itemStyle: {
+	                 normal: {
+	                     label: {
+	                         show: true,
+	                         position: 'top',
+	                         textStyle: {
+	                             color: '#333'
+	                         }
+	                     }
+	                 }
+	             },
+	             data : []
+			}]
+			
+		});
+	};
+	initChart();
+	//myChart.showLoading(); //数据加载时显示
+	//下拉框
+	function itemChange() {
+		var obj = document.getElementById('items');
+		var index = obj.selectedIndex;
+		var items = obj.options[index].value; 
+		var limitNo = document.getElementById('limitNo').value;
+		var names = []; //x轴
+		var counts = []; //y轴
+		myChart.showLoading();
+		$.ajax({
+			url : '/log/refreshChart',
+			type : 'post',
+			dataType : 'json',
+			data : {
+				"items" : items,
+				"limitNo" : limitNo
+			},
+			success : function(result){
+				myChart.hideLoading();
+				$.each(result.list, function (index, item) {
+					names.push(item._id); // x轴
+					counts.push(item.count); // y轴
+					//alert(names);
+					//alert(counts);
+				});
+
+				myChart.setOption({
+					xAxis: {
+						data: names,
+						axisLabel: {
+							interval: 0	,
+							rotate: -20
+						}
+
+					},
+					yAxis: {},
+					axisLabel: {
+						color: "#000",
+						interval: 0,
+						formatter: function(names) {
+							if (names.length > 15) {
+								return names.substring(0, 15) + "...";
+							} else {
+								return names;
+							}
+						}
+					},
+					series: [{
+						data:counts
+					}]
+				});
+			},
+			error : function(errorMsg) {
+				alert("图表加载失败,请选择查询数据！");
+				myChart.hideLoading();
+			}		
+		});
+	};
+
+
+
+</script> 
+
+
+
+</body>
+</html>

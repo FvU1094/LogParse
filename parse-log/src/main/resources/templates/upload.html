@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+	<meta charset="utf-8"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+	<title>log upload</title>
+	<link th:href="@{/css/bootstrap.min.css}" rel="stylesheet"/>
+	<link th:href="@{/font-awesome/css/font-awesome.css}" rel="stylesheet"/>
+	<link th:href="@{/css/style.css}" rel="stylesheet"/>
+	<link th:href="@{/css/bootstrap.css}" rel="stylesheet"/>
+	<script th:src="@{/js/jquery.min.js}" type="text/javascript"></script>
+</head>
+<body>
+
+<div>
+	<div class="gray-bg">
+		<!-- th:fragment="headerNav" -->
+		<div class="row wrapper border-bottom white-bg ">
+			<div class="col-lg-10">
+				<h2>日志上传</h2>
+				<ol class="breadcrumb">
+					<li><a href="/index">首页</a></li>
+					<li class="active"><strong>日志上传</strong></li>
+				</ol>
+			</div>
+			<div class="col-lg-2"></div>
+		</div>
+
+		<div class="wrapper wrapper-content animated fadeInRight">
+			<div class="row">
+				<div class="col-lg-12">
+					<div class="ibox float-e-margins">
+						<div class="ibox-title">
+							<h5>选择&amp;上传</h5>
+							<div class="ibox-tools">
+								<a class="collapse-link"> <i class="fa fa-chevron-up"></i>
+								</a>
+							</div>
+						</div>
+						<div class="ibox-content" style="display: block;">
+							<div class="row">
+								<form method="post" action="/log/upload" enctype="multipart/form-data">
+									<div>
+										<input type="file" name="file" id="file" class="inputfile" style="display:none;" accept=".log" 
+										       onChange="document.getElementsByName('filePath')[0].value=getPath(this)"
+										       data-multiple-caption="{count} files selected" multiple/>
+										<!-- <input id="file" type="file" class="inputfile" style="display:none;" onChange="getPath()"
+												data-multiple-caption="{count} files selected" multiple /> -->
+										<input type="hidden" name="filePath"/>
+										<label for="file" class="btn btn-primary" style="margin-left: 14px;">本地上传文件</label>
+									</div>
+									<div class="input-group" style="width:80%; display:flex;">
+										<input type="text" class="form-control" placeholder="文件所在路径"
+										       onchange="getFilePath()" id="fileName" style="margin-left: 14px;">
+										<input type="hidden" name="filePath"/>
+										<button type="submit" class="btn btn-primary" onclick="upload();">上传并解析</button>
+									</div>
+								</form>
+								<!-- <div style="margin-left: 14px;">
+								    <progress id="progressBar"  value="0" max="100" style="width: 300px;"></progress>
+								    <span id="percentage"></span><span id="time"></span>
+								    <br /><br />
+								    <input type="file" id="file" name="myfile"  multiple="multiple" accept=".log" />
+								    <input type="button" onclick="UpladFile()"  value="上传"  />
+								    <input type="button" onclick="cancleUploadFile()"   value="取消" />
+								</div> -->
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="col-lg-12">
+					<div class="ibox float-e-margins">
+						<div class="ibox-title">
+							<h5>上传列表</h5>
+							<div class="ibox-tools">
+								<a class="collapse-link"> <i class="fa fa-chevron-up"></i>
+								</a>
+							</div>
+						</div>
+						<div class="ibox-content">
+							<div class="table-responsive">
+								<div style="overflow-x: auto; overflow-y: auto">
+									<table class=" table table-hover" data-page-size="10">
+										<thead>
+										<tr>
+											<th>#</th>
+											<th>_id</th>
+											<th>fileName</th>
+											<th>filePath</th>
+											<th>fileSize</th>
+											<th>uploadTime</th>
+										</tr>
+										</thead>
+										<tbody>
+										<tr th:each="upload : ${uploadList}">
+											<td class="text-center"><input type="checkbox">
+											</td>
+											<td th:text="${upload._id}">Onions</td>
+											<td th:text="${upload.fileName}">Onions</td>
+											<td th:text="${upload.filePath}">Onions</td>
+											<td th:text="${upload.fileSize}">Onions</td>
+											<td th:text="${upload.uploadTime}">Onions</td>
+
+										</tr>
+										</tbody>
+										<tfoot>
+										<tr>
+											<td colspan="8">
+												<ul id="pageHTML" class="pagination pull-right"></ul>
+											</td>
+										</tr>
+										</tfoot>
+									</table>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<script type="text/javascript">
+/* 	var xhr;
+	var ot;//设置开始下载的时间
+	var oloaded;  //计算该分段上传的文件大小
+	//上传文件方法
+	function UpladFile() {
+	                console.log(document.getElementById("file").files)
+	    var fileObj = document.getElementById("file").files[0]; // js 获取文件对象
+	    var url = "/log/upload"; // 接收上传文件的后台地址
+	
+	    var form = new FormData(); // FormData 对象
+	    form.append("file", fileObj); // 文件对象
+	
+	    xhr = new XMLHttpRequest();  // XMLHttpRequest 对象
+	    xhr.open("post", url, true); //post方式，url为服务器请求地址，true 该参数规定请求是否异步处理。
+	    xhr.onload = uploadComplete; //请求完成
+	    xhr.onerror =  uploadFailed; //请求失败
+	    xhr.upload.onprogress = progressFunction;//【上传进度调用方法实现】
+	    xhr.upload.onloadstart = function(){//上传开始执行方法
+	        ot = new Date().getTime();   //设置上传开始时间
+	        oloaded = 0;//设置上传开始时，以上传的文件大小为0
+	    };
+	    xhr.send(form); //开始上传，发送form数据
+	}
+	//上传进度实现方法，上传过程中会频繁调用该方法
+	function progressFunction(evt) {
+	
+	     var progressBar = document.getElementById("progressBar");
+	     var percentageDiv = document.getElementById("percentage");
+	     // event.total是需要传输的总字节，event.loaded是已经传输的字节。如果event.lengthComputable不为真，则event.total等于0
+	     if (evt.lengthComputable) {//
+	         progressBar.max = evt.total;
+	         progressBar.value = evt.loaded;
+	         percentageDiv.innerHTML = Math.round(evt.loaded / evt.total * 100) + "%";
+	     }
+	
+	    var time = document.getElementById("time");
+	    var nt = new Date().getTime();//获取当前时间
+	    var pertime = (nt-ot)/1000; //计算出上次调用该方法时到现在的时间差，单位为s
+	    ot = new Date().getTime(); //重新赋值时间，用于下次计算
+	
+	    var perload = evt.loaded - oloaded; //计算该分段上传的文件大小，单位b
+	    oloaded = evt.loaded;//重新赋值已上传文件大小，用以下次计算
+	
+	    //上传速度计算
+	    var speed = perload/pertime;//单位b/s
+	    var bspeed = speed;
+	    var units = 'b/s';//单位名称
+	    if(speed/1024>1){
+	        speed = speed/1024;
+	        units = 'k/s';
+	    }
+	    if(speed/1024>1){
+	        speed = speed/1024;
+	        units = 'M/s';
+	    }
+	    speed = speed.toFixed(1);
+	    //剩余时间
+	    var resttime = ((evt.total-evt.loaded)/bspeed).toFixed(1);
+	    time.innerHTML = '，速度：'+speed+units+'，剩余时间：'+resttime+'s';
+	       if(bspeed==0)
+	        time.innerHTML = '上传已取消';
+	}
+	//上传成功响应
+	function uploadComplete(evt) {
+	            console.log(evt)
+	 //服务断接收完文件返回的结果
+	 //    alert(evt.target.responseText);
+	     alert("上传成功！");
+	}
+	//上传失败
+	function uploadFailed(evt) {
+	    alert("上传失败！");
+	}
+	  //取消上传
+	function cancleUploadFile(){
+	    xhr.abort();
+	} */
+
+</script>
+
+</body>
+</html>
